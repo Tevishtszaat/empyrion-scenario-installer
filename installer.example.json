@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy to installer.json next to ScenarioInstaller.exe (or Install-Scenario.ps1). Every field is optional; remove the ones you don't need. Keys starting with _ are ignored.",
+  "defaultUrl": "https://www.dropbox.com/s/your-share-id/MyScenario.zip?dl=0",
+  "scenarioName": "MyScenario",
+  "testFolderName": "MyScenario_InstallTest",
+  "title": "MyScenario Installer"
+}

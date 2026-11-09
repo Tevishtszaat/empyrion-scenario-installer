@@ -1,0 +1,21 @@
+# build outputs (the exe is published on GitHub Releases, not in git)
+dist/
+.build/
+*.exe
+*.dll
+*.pdb
+# archives and partial downloads
+*.zip
+!tests/fixtures/*.zip
+tests/fixtures/Big Pack.zip
+*.part
+*.part.src
+*.zip.src
+*.nupkg
+# logs / local config
+*.log
+installer.json
+# OS / editor
+Thumbs.db
+.DS_Store
+.vscode/
