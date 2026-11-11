@@ -47,6 +47,7 @@ try { $r = $comp.Emit($out, $null, $null, $w32, [Microsoft.CodeAnalysis.Resource
 if (-not $r.Success) { $r.Diagnostics | ForEach-Object { Write-Host $_.ToString() }; Remove-Item $exe; throw 'Build failed.' }
 
 Copy-Item (Join-Path $root 'Install-Scenario.bat') $OutDir -Force
+Copy-Item (Join-Path $root 'Install-Scenario.sh') $OutDir -Force
 Copy-Item (Join-Path $root 'installer.example.json') $OutDir -Force
 $rt = ([IO.File]::ReadAllText((Join-Path $root 'docs/README.txt')) -replace "`r`n", "`n") -replace "`n", "`r`n"
 [IO.File]::WriteAllText((Join-Path $OutDir 'README.txt'), $rt)
