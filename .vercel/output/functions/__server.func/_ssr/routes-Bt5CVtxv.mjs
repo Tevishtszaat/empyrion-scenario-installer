@@ -1,6 +1,6 @@
 import { i as __toESM } from "../_runtime.mjs";
 import { K as require_react, b as require_jsx_runtime } from "../_libs/@tanstack/react-router+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BzrH5jQq.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Bt5CVtxv.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var DEFAULT_URL = "https://drive.google.com/file/d/1jtetatjWTRW-JWj1YJkHJP77fXZLd-vh/view?usp=drive_link";
@@ -640,7 +640,7 @@ function WindowsWindow() {
 							checked: deleteZip,
 							disabled: busy || !extractAfter,
 							onChange: (e) => setDeleteZip(e.target.checked)
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Delete the downloaded zip after a successful install (frees ~19 GB)" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Delete the downloaded zip after a successful install", !haveZip && url.trim() === DEFAULT_URL ? " (frees ~19 GB)" : ""] })]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
 						className: "flex min-h-8 items-start gap-2 font-semibold text-warn",
