@@ -1107,7 +1107,7 @@ function Start-Gui {
 
     # options
     $chkOver = Add-Ctl (New-Object Windows.Forms.CheckBox) 12 434 720 22; $chkOver.Text = 'Update an existing copy of this scenario in place (default: move the old copy to Content\Scenarios_Backups first)'
-    $chkDel  = Add-Ctl (New-Object Windows.Forms.CheckBox) 12 456 720 22; $chkDel.Text = 'Delete the downloaded zip after a successful install (frees ~19 GB)'
+    $chkDel  = Add-Ctl (New-Object Windows.Forms.CheckBox) 12 456 720 22; $chkDel.Text = 'Delete the downloaded zip after a successful install'
 
     # test mode
     $chkTest = Add-Ctl (New-Object Windows.Forms.CheckBox) 12 482 720 22
@@ -1184,6 +1184,17 @@ function Start-Gui {
             elseif ($lk.IsDefault -and $script:DefaultNameKnown) { $lblName.ForeColor = [Drawing.SystemColors]::ControlText; $lblName.Text = "Scenario name: $($script:ScenarioName)   (default download; confirmed from the zip after downloading)" }
             else { $script:GuiScenName = '<name from the zip>'; $lblName.ForeColor = 'DarkBlue'; $lblName.Text = ("{0} ({1}) - the scenario name is read from the zip after downloading" -f $lk.Label, $lk.Host) }
         }
+        $free = ''
+        if ($chkHave.Checked -and $z -and (Test-Path -LiteralPath $z -PathType Leaf)) {
+            $len = (Get-Item -LiteralPath $z).Length
+            if ($len -gt 0) { $free = (' (frees ~{0:N1} GB)' -f ($len / 1GB)) }
+        } else {
+            $lkSize = Resolve-DownloadUrl $txtUrl.Text
+            if ($lkSize.IsDefault -and $script:DefaultIsBuiltin -and $script:FallbackArchiveSize -gt 0) {
+                $free = (' (frees ~{0:N0} GB)' -f ($script:FallbackArchiveSize / 1GB))
+            }
+        }
+        $chkDel.Text = 'Delete the downloaded zip after a successful install' + $free
     }
     $updateMode = {
         $p = $cbEmp.Text.Trim()

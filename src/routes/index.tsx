@@ -622,7 +622,10 @@ function WindowsWindow() {
         </label>
         <label className="flex min-h-8 items-start gap-2">
           <input className="mt-1" type="checkbox" checked={deleteZip} disabled={busy || !extractAfter} onChange={(e) => setDeleteZip(e.target.checked)} />
-          <span>Delete the downloaded zip after a successful install (frees ~19 GB)</span>
+          <span>
+            Delete the downloaded zip after a successful install
+            {!haveZip && url.trim() === DEFAULT_URL ? " (frees ~19 GB)" : ""}
+          </span>
         </label>
         <label className="flex min-h-8 items-start gap-2 font-semibold text-warn">
           <input className="mt-1" type="checkbox" checked={testMode} disabled={busy} onChange={(e) => setTestMode(e.target.checked)} />
