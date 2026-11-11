@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6 - 2026-11-11
+- Linux and macOS support: Steam library detection now looks in the usual places (`~/.steam/steam`, `~/.local/share/Steam`, Flatpak Steam, macOS Application Support). Console mode is used automatically on non-Windows (the WinForms GUI remains Windows-only).
+- Added `Install-Scenario.sh` launcher (requires PowerShell Core / `pwsh`).
+- Version bump to 1.0.6.
+
 ## 1.0.5 - 2026-11-09
 - `installer.json` next to the exe / .ps1 (or `-Config <path>`): `defaultUrl`, `scenarioName`, `testFolderName`, `title`.
   Invalid files are ignored and logged; the built-in Ascension-Reborn defaults stay when there is no config.
