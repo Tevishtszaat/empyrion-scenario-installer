@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7 - 2026-11-12
+- The "delete the downloaded zip" checkbox no longer always says it frees ~19 GB. That size is only shown for the built-in Ascension-Reborn download. Any other link leaves the size off. If you already have the zip, the note uses that file's real size.
+- Launcher assembly version set to 1.0.7.
+
 ## 1.0.6 - 2026-11-11
 - Linux and macOS support: Steam library detection now looks in the usual places (`~/.steam/steam`, `~/.local/share/Steam`, Flatpak Steam, macOS Application Support). Console mode is used automatically on non-Windows (the WinForms GUI remains Windows-only).
 - Added `Install-Scenario.sh` launcher (requires PowerShell Core / `pwsh`).

@@ -53,7 +53,7 @@ $script:LastRemoteFileName = $null
 $script:FallbackArchiveSize = [int64]19072427908      # used only if Drive doesn't report a size
 $script:FallbackUncompressed = [int64]20788872025
 $script:AppIds = [ordered]@{ '383120' = 'Empyrion - Galactic Survival'; '530870' = 'Empyrion - Dedicated Server' }
-$script:Version = '1.0.6'
+$script:Version = '1.0.7'
 $script:Cancel = $false
 $script:LogBox = $null
 $script:ProgressCb = $null       # scriptblock(percent:int, text:string)

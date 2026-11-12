@@ -28,7 +28,7 @@ function Home() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-chrome-fg/80">
-            Scenario Installer 1.0.6 — the window players see on Windows. Linux uses the same steps in the console.
+            Scenario Installer 1.0.7 — the window players see on Windows. Linux uses the same steps in the console.
           </p>
           <div className="flex rounded-md border border-line/40 bg-chrome p-0.5 text-sm">
             <button
@@ -366,7 +366,7 @@ function WindowsWindow() {
     <section className="flex min-h-[36rem] flex-col overflow-hidden rounded-win border border-chrome bg-form text-ink shadow-lg">
       <header className="flex h-9 shrink-0 items-center justify-between bg-chrome px-3 text-sm text-chrome-fg">
         <span className="truncate font-medium">
-          Scenario Installer 1.0.6{testMode ? "   [TEST MODE]" : ""}
+          Scenario Installer 1.0.7{testMode ? "   [TEST MODE]" : ""}
         </span>
         <span className="flex gap-1.5" aria-hidden="true">
           <span className="size-3 rounded-sm bg-btn" />
@@ -690,7 +690,7 @@ function LinuxConsole() {
 
   const draft = [
     "$ ./Install-Scenario.sh",
-    "Scenario Installer 1.0.6  (console — no window on Linux)",
+    "Scenario Installer 1.0.7  (console — no window on Linux)",
     "Looking for Steam and Empyrion...",
     "Steam library: /home/you/.steam/steam",
     "Found Game: /home/you/.steam/steam/steamapps/common/Empyrion - Galactic Survival",

@@ -1,4 +1,4 @@
-SCENARIO INSTALLER v1.0.5  (for Empyrion - Galactic Survival)
+SCENARIO INSTALLER v1.0.7  (for Empyrion - Galactic Survival)
 ====================================================================
 Installs an Empyrion scenario and its SharedData in one go.
 Default scenario: Ascension-Reborn (downloaded from its Google Drive link).

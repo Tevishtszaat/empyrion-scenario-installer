@@ -9,7 +9,7 @@ paste any link, and server admins / scenario makers can ship their own default w
 
 - **Windows** 10/11: Windows PowerShell 5.1 (built in). No install, no admin rights needed (unless your Empyrion folder is write-protected). Download the `.exe` or `.zip` from Releases.
 - **Linux / macOS**: Requires [PowerShell Core](https://github.com/PowerShell/PowerShell) (`pwsh`). Use the `Install-Scenario.sh` launcher (or run the `.ps1` directly). Console mode is used automatically. Steam libraries are detected in the usual places (including Flatpak Steam on Linux).
-- Download: [Releases](../../releases) -> `ScenarioInstaller_v1.0.6.zip` (Windows) or the source files for Linux.
+- Download: [Releases](../../releases) -> `ScenarioInstaller_v1.0.7.zip` (Windows) or the source files for Linux.
 
 ---
 

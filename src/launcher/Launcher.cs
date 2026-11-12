@@ -7,8 +7,8 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Scenario Installer")]
 [assembly: AssemblyProduct("Scenario Installer")]
 [assembly: AssemblyCompany("Scenario Installer")]
-[assembly: AssemblyVersion("1.0.5.0")]
-[assembly: AssemblyFileVersion("1.0.5.0")]
+[assembly: AssemblyVersion("1.0.7.0")]
+[assembly: AssemblyFileVersion("1.0.7.0")]
 static class Program {
     [STAThread]
     static int Main(string[] args) {
