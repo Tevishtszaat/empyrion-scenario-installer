@@ -10,8 +10,10 @@ SMALL SCREENS
   maximize the window.
 
 WHAT IT DOES
-  1. Finds your Empyrion folder automatically (through Steam, including extra
-     Steam library drives). You can change it with "Browse...".
+  1. Finds your Empyrion folder automatically on every fixed drive (C:, D:, E:, …),
+     not only the Steam library already known on one drive. Change it with
+     "Browse..." (the picker lists This PC) or paste a path from
+     Steam -> Manage -> Browse local files.
   2. Gets the scenario zip: downloads it from the "Download link" box, or uses
      a zip you already have. The box starts with the default link
      (Ascension-Reborn, about 19 GB, on Google Drive); paste your own link to

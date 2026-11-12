@@ -385,19 +385,31 @@ function WindowsWindow() {
           Scenario: {scenario || "name from the zip"} — installs it into the path below, then copies its SharedData into the save(s) you pick.
         </p>
 
-        <p>1. Empyrion folder (found automatically - change it if needed):</p>
+        <p>1. Empyrion folder (auto-detects all drives via Steam + scan — Browse or paste if needed):</p>
         <div className="flex gap-2">
-          <select
+          <input
             className="h-8 min-w-0 flex-1 border border-line bg-field px-2"
+            list="empyrion-paths"
             value={empyrion}
             onChange={(e) => setEmpyrion(e.target.value)}
             disabled={busy}
-          >
+            aria-label="Empyrion folder"
+          />
+          <datalist id="empyrion-paths">
             {EMPYRION.map((p) => (
-              <option key={p}>{p}</option>
+              <option key={p} value={p} />
             ))}
-          </select>
-          <button type="button" className="h-8 min-w-24 shrink-0 border border-line bg-btn px-2 hover:bg-btn-hot" disabled={busy}>
+          </datalist>
+          <button
+            type="button"
+            className="h-8 min-w-24 shrink-0 border border-line bg-btn px-2 hover:bg-btn-hot"
+            disabled={busy}
+            onClick={() =>
+              append(
+                "Browse lists every drive (This PC). If it is cancelled, paste the path from Steam → Manage → Browse local files.",
+              )
+            }
+          >
             Browse...
           </button>
         </div>

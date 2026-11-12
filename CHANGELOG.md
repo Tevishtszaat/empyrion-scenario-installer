@@ -1,6 +1,10 @@
 # Changelog
 
 ## 1.0.7 - 2026-11-12
+- Empyrion auto-detect scans **all fixed drives** (C:, D:, E:, …), not only Steam libraries already known on one drive.
+- **Browse…** folder picker starts at “This PC” so every drive is listed; the dialog is brought to the front.
+- Empyrion path box accepts **paste/type** of any path; Browse adds the chosen folder to the list.
+- Hint when Browse is cancelled: paste the path from Steam → Manage → Browse local files.
 - The "delete the downloaded zip" checkbox no longer always says it frees ~19 GB. That size is only shown for the built-in Ascension-Reborn download. Any other link leaves the size off. If you already have the zip, the note uses that file's real size.
 - Launcher assembly version set to 1.0.7.
 

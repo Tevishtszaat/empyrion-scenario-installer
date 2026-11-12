@@ -108,13 +108,13 @@ function Get-SteamRoots {
         foreach ($d in @("${env:ProgramFiles(x86)}\Steam", "$env:ProgramFiles\Steam")) { if ($d -and $d -ne '\Steam') { $roots.Add($d) } }
     } else {
         # Linux and macOS common Steam locations (including Flatpak Steam on Linux)
-        $home = if ($env:HOME) { $env:HOME } else { [Environment]::GetFolderPath('UserProfile') }
+        $userHome = if ($env:HOME) { $env:HOME } else { [Environment]::GetFolderPath('UserProfile') }
         $cands = @(
-            (Join-Path $home '.steam/steam'),
-            (Join-Path $home '.local/share/Steam'),
-            (Join-Path $home '.steam/root'),
-            (Join-Path $home 'Library/Application Support/Steam'),
-            (Join-Path $home '.var/app/com.valvesoftware.Steam/.local/share/Steam')
+            (Join-Path $userHome '.steam/steam'),
+            (Join-Path $userHome '.local/share/Steam'),
+            (Join-Path $userHome '.steam/root'),
+            (Join-Path $userHome 'Library/Application Support/Steam'),
+            (Join-Path $userHome '.var/app/com.valvesoftware.Steam/.local/share/Steam')
         )
         foreach ($c in $cands) { if ($c -and (Test-Path -LiteralPath $c)) { $roots.Add($c) } }
     }
@@ -194,6 +194,91 @@ function Find-EmpyrionInstalls([string[]]$libraries) {
             }
         }
     }
+    return ,$found
+}
+
+
+# Extra Steam library roots on every fixed drive (Steam VDF often only lists the drives Steam knows;
+# players still install on C: / E: / etc. while auto-detect only showed D:).
+function Get-ExtraSteamLibraryCandidates {
+    $cands = New-Object System.Collections.Generic.List[string]
+    $names = @(
+        'Steam',
+        'SteamLibrary',
+        'Steam Library',
+        'SteamApps',
+        'Games\Steam',
+        'Games\SteamLibrary',
+        'Program Files (x86)\Steam',
+        'Program Files\Steam'
+    )
+    try {
+        $drives = [IO.DriveInfo]::GetDrives() | Where-Object {
+            $_.DriveType -eq 'Fixed' -and $_.IsReady
+        }
+    } catch { $drives = @() }
+    foreach ($dr in $drives) {
+        $root = $dr.Name  # e.g. C:\
+        foreach ($n in $names) {
+            $cands.Add((Join-Path $root $n))
+        }
+        # common per-drive layout used by Steam's "new library folder" wizard
+        $cands.Add((Join-Path $root 'SteamLibrary\steamapps'))
+    }
+    # always include the well-known Program Files locations even if drive enum fails
+    foreach ($d in @("${env:ProgramFiles(x86)}\Steam", "$env:ProgramFiles\Steam")) {
+        if ($d -and $d -ne '\Steam') { $cands.Add($d) }
+    }
+    return ,@($cands)
+}
+
+# Deepen discovery: Steam libraries + every fixed-drive common path + optional shallow search for EmpyrionLauncher.exe
+function Find-AllEmpyrionInstalls {
+    $libs = Get-SteamLibraries (Get-SteamRoots)
+    foreach ($c in (Get-ExtraSteamLibraryCandidates)) {
+        try {
+            $f = Get-FullPathSafe $c
+            if (Test-Path -LiteralPath $f) {
+                # if they pointed at ...\steamapps, use parent as library root
+                if ((Split-Path -Leaf $f) -ieq 'steamapps') { $f = Split-Path -Parent $f }
+                if ($libs -notcontains $f) { $libs += $f }
+            }
+        } catch {}
+    }
+    $found = Find-EmpyrionInstalls $libs
+
+    # Last resort: look for EmpyrionLauncher.exe under common\ on each drive (shallow)
+    $seen = @{}
+    foreach ($i in $found) { $seen[$i.Path.ToLowerInvariant()] = 1 }
+    $extra = @()
+    try {
+        $drives = [IO.DriveInfo]::GetDrives() | Where-Object { $_.DriveType -eq 'Fixed' -and $_.IsReady }
+    } catch { $drives = @() }
+    foreach ($dr in $drives) {
+        $patterns = @(
+            (Join-Path $dr.Name 'Steam\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'SteamLibrary\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'Steam Library\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'Games\Steam\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'Games\SteamLibrary\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'Program Files (x86)\Steam\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'Program Files\Steam\steamapps\common\Empyrion - Galactic Survival'),
+            (Join-Path $dr.Name 'Steam\steamapps\common\Empyrion - Dedicated Server'),
+            (Join-Path $dr.Name 'SteamLibrary\steamapps\common\Empyrion - Dedicated Server'),
+            (Join-Path $dr.Name 'Program Files (x86)\Steam\steamapps\common\Empyrion - Dedicated Server')
+        )
+        foreach ($p in $patterns) {
+            if (-not (Test-EmpyrionDir $p)) { continue }
+            $k = $p.ToLowerInvariant()
+            if ($seen.ContainsKey($k)) { continue }
+            $seen[$k] = 1
+            $kind = 'Game'
+            if ($p -match 'Dedicated') { $kind = 'Dedicated Server' }
+            $extra += New-Object psobject -Property @{ Path = $p; Kind = $kind }
+            Write-Log ("Found {0} on drive scan: {1}" -f $kind, $p)
+        }
+    }
+    if ($extra.Count) { $found = @($found) + $extra }
     return ,$found
 }
 
@@ -917,7 +1002,8 @@ function Invoke-Install($opt) {
 # ----------------------------------------------------------------- console mode
 function Start-Console {
     $libs = Get-SteamLibraries (Get-SteamRoots)
-    $inst = Find-EmpyrionInstalls $libs
+    foreach ($l in $libs) { Write-Log "Steam library: $l" }
+    $inst = Find-AllEmpyrionInstalls
     if ($ListOnly) {
         Write-Host 'Steam libraries:'; $libs | ForEach-Object { Write-Host "  $_" }
         Write-Host 'Empyrion installs:'; $inst | ForEach-Object { Write-Host ("  [{0}] {1}" -f $_.Kind, $_.Path) }
@@ -1080,8 +1166,9 @@ function Start-Gui {
     $lblSub = Add-Ctl (New-Label '') 12 38 720 20
 
     # 1 Empyrion folder
-    [void](Add-Ctl (New-Label '1. Empyrion folder (found automatically - change it if needed):') 12 66 720 18)
+    [void](Add-Ctl (New-Label '1. Empyrion folder (auto-detects all drives via Steam + scan - Browse or paste if needed):') 12 66 720 18)
     $cbEmp = Add-Ctl (New-Object Windows.Forms.ComboBox) 12 86 620 24
+    $cbEmp.DropDownStyle = 'DropDown'   # allow paste/type of any drive path
     $btnEmp = Add-Ctl (New-Object Windows.Forms.Button) 640 85 90 26; $btnEmp.Text = 'Browse...'
     $lblEmp = Add-Ctl (New-Label '') 12 112 720 18
 
@@ -1154,9 +1241,40 @@ function Start-Gui {
 
     $pickFolder = {
         param([string]$desc, [string]$start)
-        $d = New-Object Windows.Forms.FolderBrowserDialog; $d.Description = $desc; $d.ShowNewFolderButton = $true
-        if ($start -and (Test-Path -LiteralPath $start)) { $d.SelectedPath = $start }
-        if ($d.ShowDialog($form) -eq 'OK') { return $d.SelectedPath }; return $null
+        # FolderBrowserDialog: RootFolder=MyComputer lists every drive (not only the current one).
+        # TopMost + owner form stops the dialog appearing "dead" behind the installer window.
+        $d = New-Object Windows.Forms.FolderBrowserDialog
+        $d.Description = $desc + '  (pick any drive: C:, D:, E:, ...)'
+        $d.ShowNewFolderButton = $true
+        try { $d.RootFolder = [Environment+SpecialFolder]::MyComputer } catch {}
+        if ($start) {
+            try {
+                if (Test-Path -LiteralPath $start) { $d.SelectedPath = (Get-FullPathSafe $start) }
+                else {
+                    $parent = Split-Path -Parent $start
+                    if ($parent -and (Test-Path -LiteralPath $parent)) { $d.SelectedPath = (Get-FullPathSafe $parent) }
+                }
+            } catch {}
+        }
+        $wasTop = $form.TopMost
+        try {
+            $form.TopMost = $true
+            $form.BringToFront()
+            $r = $d.ShowDialog($form)
+        } finally { $form.TopMost = $wasTop }
+        if ($r -eq 'OK' -and $d.SelectedPath) { return $d.SelectedPath }
+        return $null
+    }
+    $setEmpyrionPath = {
+        param([string]$p)
+        if (-not $p) { return }
+        $p = $p.Trim().Trim('"')
+        if (-not $p) { return }
+        $exists = $false
+        foreach ($it in $cbEmp.Items) { if ([string]$it -ieq $p) { $exists = $true; break } }
+        if (-not $exists) { [void]$cbEmp.Items.Add($p) }
+        $cbEmp.Text = $p
+        & $validateEmp
     }
     $refreshSaves = {
         $lstSaves.Items.Clear(); [void]$script:SaveItems.Clear()
@@ -1225,14 +1343,16 @@ function Start-Gui {
         try {
             $libs = Get-SteamLibraries (Get-SteamRoots)
             foreach ($l in $libs) { Write-Log "Steam library: $l" }
-            $inst = Find-EmpyrionInstalls $libs
+            Write-Log 'Also scanning fixed drives for Empyrion (C:, D:, E:, ...)...'
+            $inst = Find-AllEmpyrionInstalls
             foreach ($i in $inst) { [void]$cbEmp.Items.Add($i.Path); Write-Log ("Found {0}: {1}" -f $i.Kind, $i.Path) }
-            if ($cbEmp.Items.Count) { $cbEmp.SelectedIndex = 0 } else { Write-Log 'Empyrion was not found automatically. Click Browse... and pick your Empyrion folder.' }
+            if ($cbEmp.Items.Count) { $cbEmp.SelectedIndex = 0 }
+            else { Write-Log 'Empyrion was not found automatically. Click Browse... (or paste the full path from Steam > Browse local files).' }
         } catch { Write-Log "Auto-detect error: $_" }
         & $validateEmp
     })
     $cbEmp.Add_SelectedIndexChanged($validateEmp); $cbEmp.Add_Leave($validateEmp)
-    $btnEmp.Add_Click({ $p = & $pickFolder 'Select your "Empyrion - Galactic Survival" (or Dedicated Server) folder' $cbEmp.Text; if ($p) { $cbEmp.Text = $p; & $validateEmp } })
+    $btnEmp.Add_Click({ $p = & $pickFolder 'Select your "Empyrion - Galactic Survival" (or Dedicated Server) folder' $cbEmp.Text; if ($p) { & $setEmpyrionPath $p } else { Write-Log 'Browse cancelled. You can still paste a path into the Empyrion box (Steam > Manage > Browse local files).' } })
     $btnDl.Add_Click({ $p = & $pickFolder 'Folder to download the scenario zip into' $txtDl.Text; if ($p) { $txtDl.Text = $p } })
     $chkHave.Add_CheckedChanged({ $txtZip.Enabled = $chkHave.Checked; $btnZip.Enabled = $chkHave.Checked; $txtDl.Enabled = -not $chkHave.Checked; $btnDl.Enabled = -not $chkHave.Checked; $txtUrl.Enabled = -not $chkHave.Checked; $btnUrlReset.Enabled = -not $chkHave.Checked; & $detectName; & $updateMode })
     $txtUrl.Add_TextChanged({ & $detectName; & $updateMode })
